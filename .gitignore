@@ -69,3 +69,4 @@
 
 ### VS Code ###
 /micro_producer/.vscode/
+/graphql_project/app/__pycache__

@@ -1,0 +1,18 @@
+python -m venv venv
+Set-ExecutionPolicy Unrestricted -Scope Process
+venv\Scripts\activate
+pip install fastapi uvicorn requests grpcio grpcio-tools
+pip install git+https://github.com/strawberry-graphql/strawberry
+
+------------------------------------------------------------------------------------------------
+#compilar archivo .proto
+python -m grpc_tools.protoc -Iproto --python_out=app --grpc_python_out=app proto/service.proto
+
+------------------------------------------------------------------------------------------------
+#Ejecutar el servidor GraphQL
+python -m uvicorn app.main:app --reload
+
+------------------------------------------------------------------------------------------------
+#Configuraciones apra Auth0
+pip install python-jose[cryptography] python-dotenv
+uvicorn app.main:app --reload
