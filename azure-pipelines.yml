@@ -1,0 +1,89 @@
+trigger:
+- main  # Ajusta si tu rama principal tiene otro nombre
+
+resources:
+  repositories:
+    - repository: micro_producer
+      type: git
+      name: Patrones IE/micro_producer
+    - repository: micro_consumer
+      type: git
+      name: Patrones IE/micro_consumer
+
+pool:
+  name: PatronesIE  # 👉 Usando tu agente Docker auto-hospedado
+
+variables:
+  imageRepositoryProducer: 'micro_producer'
+  imageRepositoryConsumer: 'micro_consumer'
+  tag: '$(Build.BuildId)'
+
+stages:
+- stage: Build
+  displayName: 'Construir imágenes Docker'
+  jobs:
+  - job: Build
+    displayName: 'Construcción de microservicios'
+    workspace:
+      clean: all
+    steps:
+    - checkout: self
+    - checkout: micro_producer
+    - checkout: micro_consumer
+
+    # ✅ 👉 Asignamos permisos, configuramos UTF-8 y limpiamos caché Maven
+    - script: |
+        echo "🔧 Configurando entorno para UTF-8 y limpieza de caché Maven..."
+        export MAVEN_OPTS="-Dfile.encoding=UTF-8"
+        rm -rf ~/.m2/repository
+
+        echo "🔧 Dando permisos de ejecución al wrapper de Maven..."
+        chmod +x $(Build.SourcesDirectory)/micro_producer/mvnw
+        chmod +x $(Build.SourcesDirectory)/micro_consumer/mvnw
+
+        echo "🔍 Verificando codificación de application.properties..."
+        file -i $(Build.SourcesDirectory)/micro_producer/src/main/resources/application.properties
+        iconv -f ISO-8859-1 -t UTF-8 $(Build.SourcesDirectory)/micro_producer/src/main/resources/application.properties -o $(Build.SourcesDirectory)/micro_producer/src/main/resources/application.properties || true
+
+        echo "🔧 Compilando micro_producer con codificación UTF-8 explícita..."
+        cd $(Build.SourcesDirectory)/micro_producer
+        ./mvnw clean package -DskipTests -e
+
+        echo "🔧 Compilando micro_consumer con codificación UTF-8 explícita..."
+        cd $(Build.SourcesDirectory)/micro_consumer
+        ./mvnw clean package -DskipTests -e
+      displayName: '🏗️ Compilación de microservicios (Maven) con UTF-8 y limpieza'
+
+    # ✅ 👉 Construimos las imágenes Docker ahora que los .war existen
+    - script: |
+        echo "🔨 Construyendo imagen del microservicio Producer (uso de imágenes locales)..."
+        docker build -t micro_producer:$(tag) $(Build.SourcesDirectory)/micro_producer
+
+        echo "🔨 Construyendo imagen del microservicio Consumer (uso de imágenes locales)..."
+        docker build -t micro_consumer:$(tag) $(Build.SourcesDirectory)/micro_consumer
+
+        echo "🔍 Verificando imágenes generadas..."
+        docker images
+
+        echo "🔍 Tag generado para las imágenes: $(tag)"
+      displayName: '🐳 Construcción y verificación de imágenes Docker locales'
+
+- stage: Deploy
+  displayName: 'Desplegar con Docker Compose (Imágenes Locales)'
+  dependsOn: Build
+  jobs:
+  - job: Deploy
+    displayName: 'Despliegue con docker-compose (usando imágenes locales)'
+    workspace:
+      clean: all
+    steps:
+    - checkout: self
+    - script: |
+        echo "🚀 Iniciando despliegue con docker-compose usando imágenes locales..."
+        cd $(Build.SourcesDirectory)
+        docker-compose down || true
+        docker-compose up -d --build
+
+        echo "🔄 Verificando estado de los contenedores..."
+        docker ps -a
+      displayName: '🎛️ Levantar servicios con docker-compose usando imágenes locales'
