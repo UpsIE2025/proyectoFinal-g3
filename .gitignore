@@ -1,0 +1,71 @@
+########### MICRO CONSUMER################
+
+/micro_consumer/HELP.md
+/micro_consumer/target/
+/micro_consumer/!.mvn/wrapper/maven-wrapper.jar
+/micro_consumer/!**/src/main/**/target/
+/micro_consumer/!**/src/test/**/target/
+
+### STS ###
+/micro_consumer/.apt_generated
+/micro_consumer/.classpath
+/micro_consumer/.factorypath
+/micro_consumer/.project
+/micro_consumer/.settings
+/micro_consumer/.springBeans
+/micro_consumer/.sts4-cache
+
+### IntelliJ IDEA ###
+/micro_consumer/.idea
+/micro_consumer/*.iws
+/micro_consumer/*.iml
+/micro_consumer/*.ipr
+
+### NetBeans ###
+/micro_consumer//nbproject/private/
+/micro_consumer//nbbuild/
+/micro_consumer//dist/
+/micro_consumer//nbdist/
+/micro_consumer//.nb-gradle/
+/micro_consumer/build/
+/micro_consumer/!**/src/main/**/build/
+/micro_consumer/!**/src/test/**/build/
+
+### VS Code ###
+/micro_consumer/.vscode/
+
+########### MICRO PRODUCER########
+
+/micro_producer/HELP.md
+/micro_producer/target/
+/micro_producer/!.mvn/wrapper/maven-wrapper.jar
+/micro_producer/!**/src/main/**/target/
+/micro_producer/!**/src/test/**/target/
+
+### STS ###
+/micro_producer/.apt_generated
+/micro_producer/.classpath
+/micro_producer/.factorypath
+/micro_producer/.project
+/micro_producer/.settings
+/micro_producer/.springBeans
+/micro_producer/.sts4-cache
+
+### IntelliJ IDEA ###
+/micro_producer/.idea
+/micro_producer/*.iws
+/micro_producer/*.iml
+/micro_producer/*.ipr
+
+### NetBeans ###
+/micro_producer//nbproject/private/
+/micro_producer//nbbuild/
+/micro_producer//dist/
+/micro_producer//nbdist/
+/micro_producer//.nb-gradle/
+/micro_producer/build/
+/micro_producer/!**/src/main/**/build/
+/micro_producer/!**/src/test/**/build/
+
+### VS Code ###
+/micro_producer/.vscode/
