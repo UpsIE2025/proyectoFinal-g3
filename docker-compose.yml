@@ -31,3 +31,14 @@ services:
       - "8082:8082"
     depends_on:
       - kafka
+
+  graphql_service:
+    build: .
+    container_name: graphql_service
+    ports:
+      - "8000:8000"
+    depends_on:
+      - kafka
+    environment:
+      - KAFKA_BROKER=kafka:9092
+      #- DATABASE_URL=postgresql://postgres:password@postgres:5432/mydatabase
