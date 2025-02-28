@@ -1,0 +1,25 @@
+version: "3.8"
+
+services:
+  db:
+    image: postgres:15
+    container_name: postgres_grpc
+    restart: always
+    environment:
+      POSTGRES_DB: integracion
+      POSTGRES_USER: proyecto
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5432:5432"
+
+  app:
+    build: .
+    container_name: springboot_grpc
+    depends_on:
+      - db
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/integracion
+      SPRING_DATASOURCE_USERNAME: proyecto
+      SPRING_DATASOURCE_PASSWORD: password
+    ports:
+      - "9090:9090"

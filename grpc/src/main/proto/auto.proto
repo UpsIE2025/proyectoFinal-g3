@@ -1,0 +1,40 @@
+syntax = "proto3";
+
+package com.grupo3.grpc;
+
+service AutoService {
+  rpc CreateAuto (CreateAutoRequest) returns (AutoResponse);
+  rpc UpdateAuto (UpdateAutoRequest) returns (AutoResponse);
+  rpc GetAuto (AutoRequest) returns (AutoResponse);
+  rpc ListAutos (AutoListRequest) returns (AutoList);
+}
+
+message AutoRequest {
+  string id = 1;
+}
+
+message CreateAutoRequest {
+  string marca = 1;
+  string modelo = 2;
+  int32 anio = 3;
+}
+
+message UpdateAutoRequest {
+  string id = 1;
+  string marca = 2;
+  string modelo = 3;
+  int32 anio = 4;
+}
+
+message AutoResponse {
+  string id = 1;
+  string marca = 2;
+  string modelo = 3;
+  int32 anio = 4;
+}
+
+message AutoListRequest {}
+
+message AutoList {
+  repeated AutoResponse autos = 1;
+}
