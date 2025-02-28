@@ -7,6 +7,14 @@ services:
       - name: backend-route
         paths:
           - /api
+  - name: graphql_service
+    url: http://graphql_project:8000  # Dirección interna del servicio dentro del Docker network
+    routes:
+      - name: graphql_route
+        paths:
+          - /send-message
+          - /test
+        strip_path: false  # Asegura que no se elimine "/graphql" al redirigir la solicitud
 
 plugins:
   - name: jwt

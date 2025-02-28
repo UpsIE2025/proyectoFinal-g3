@@ -1,0 +1,7 @@
+fastapi
+strawberry-graphql
+pydantic
+uvicorn
+requests
+grpcio
+grpcio-tools
