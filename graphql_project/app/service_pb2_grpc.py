@@ -3,7 +3,7 @@
 import grpc
 import warnings
 
-from . import service_pb2 as service__pb2
+from app import service_pb2 as service_pb2
 
 GRPC_GENERATED_VERSION = '1.70.0'
 GRPC_VERSION = grpc.__version__
@@ -25,7 +25,7 @@ if _version_not_supported:
     )
 
 
-class ExampleServiceStub(object):
+class AutoServiceStub(object):
     """Missing associated documentation comment in .proto file."""
 
     def __init__(self, channel):
@@ -34,43 +34,43 @@ class ExampleServiceStub(object):
         Args:
             channel: A grpc.Channel.
         """
-        self.GetData = channel.unary_unary(
-                '/ExampleService/GetData',
-                request_serializer=service__pb2.Empty.SerializeToString,
-                response_deserializer=service__pb2.Response.FromString,
+        self.ObtenerAuto = channel.unary_unary(
+                '/AutoService/ObtenerAuto',
+                request_serializer=service__pb2.AutoRequest.SerializeToString,
+                response_deserializer=service__pb2.AutoResponse.FromString,
                 _registered_method=True)
 
 
-class ExampleServiceServicer(object):
+class AutoServiceServicer(object):
     """Missing associated documentation comment in .proto file."""
 
-    def GetData(self, request, context):
+    def ObtenerAuto(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
 
-def add_ExampleServiceServicer_to_server(servicer, server):
+def add_AutoServiceServicer_to_server(servicer, server):
     rpc_method_handlers = {
-            'GetData': grpc.unary_unary_rpc_method_handler(
-                    servicer.GetData,
-                    request_deserializer=service__pb2.Empty.FromString,
-                    response_serializer=service__pb2.Response.SerializeToString,
+            'ObtenerAuto': grpc.unary_unary_rpc_method_handler(
+                    servicer.ObtenerAuto,
+                    request_deserializer=service__pb2.AutoRequest.FromString,
+                    response_serializer=service__pb2.AutoResponse.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
-            'ExampleService', rpc_method_handlers)
+            'AutoService', rpc_method_handlers)
     server.add_generic_rpc_handlers((generic_handler,))
-    server.add_registered_method_handlers('ExampleService', rpc_method_handlers)
+    server.add_registered_method_handlers('AutoService', rpc_method_handlers)
 
 
  # This class is part of an EXPERIMENTAL API.
-class ExampleService(object):
+class AutoService(object):
     """Missing associated documentation comment in .proto file."""
 
     @staticmethod
-    def GetData(request,
+    def ObtenerAuto(request,
             target,
             options=(),
             channel_credentials=None,
@@ -83,9 +83,9 @@ class ExampleService(object):
         return grpc.experimental.unary_unary(
             request,
             target,
-            '/ExampleService/GetData',
-            service__pb2.Empty.SerializeToString,
-            service__pb2.Response.FromString,
+            '/AutoService/ObtenerAuto',
+            service__pb2.AutoRequest.SerializeToString,
+            service__pb2.AutoResponse.FromString,
             options,
             channel_credentials,
             insecure,
