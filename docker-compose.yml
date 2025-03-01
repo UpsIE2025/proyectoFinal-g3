@@ -85,8 +85,7 @@ services:
     restart: always
     ports:
       - "8002:8000" 
-  
-  networks:
+    networks:
       - kong-network
 
   #Pendiente configurar Dockerfile, y comprobar puertos
