@@ -1,17 +1,55 @@
-python -m venv venv
-Set-ExecutionPolicy Unrestricted -Scope Process
-venv\Scripts\activate
-pip install fastapi uvicorn requests grpcio grpcio-tools
-pip install git+https://github.com/strawberry-graphql/strawberry
+------------------------------------------------------------------------------------------------
+--DESCRIPCION
+La funcionalidad principal del proyecto graphQL es para realizar la redireccion a dos endpoint o servicios
+los cuales implementan tecnologias diferentes los cuales son:
+    - rest: para comunicacion con kafka.
+    - grpc: crud y persistencia a la base de tsotos postgres.
+
+El servicio que expone este proyecto llamado send_message con URL de conexión /send-message implementado en
+el metodo send_message, el cual recibe como parametro un objeto tipo JSON.
+{
+    message: str
+    request_type: str  # puede ser "rest" o "grp"
+    auto_id: int = None  # Para consultas gRPC
+}
+
+Con el parametro request_type identificamos el tipo de peticion que se realiza desde el API Gateway, con
+este parametro identificamos al servicio que debemos redireccionar.
+
+if data.request_type.lower() == "rest":
+        response = fetch_data_from_rest(data.message)
+    elif data.request_type.lower() == "grpc":
+        if data.auto_id is None:
+            raise HTTPException(status_code=400, detail="auto_id is required for gRPC requests.")
+        response = fetch_data_from_grpc(data.auto_id)
+    else:
+        raise HTTPException(status_code=400, detail="Invalid request_type. Use 'rest' or 'grpc'.")
+
+En la clase rest_client.py se define el metodo fetch_data_from_rest, en el cual se indica a que 
+servicio invocara.
+
+En la clase grpc_client.py se define el metodo fetch_data_from_grpc que realiza la conexion al servicio grpc
+
+Tambien se define el archivo /proto/service.proto eque contiene la definicion de los metodos grpc a usar
+
+En la clase graphql_schema.py, se define el esqueman de cada uno de los servicios a consumir siendo 
+rest o grpc
 
 ------------------------------------------------------------------------------------------------
-#compilar archivo .proto
-python -m grpc_tools.protoc -I app/proto --python_out=app --grpc_python_out=app app/proto/service.proto
-
+--COMANDO DE EJECUCION
+    1.- python -m venv venv
+    2.- Set-ExecutionPolicy Unrestricted -Scope Process
+    3.- venv\Scripts\activate
+    4.- pip install fastapi uvicorn requests grpcio grpcio-tools
+    5.- pip install git+https://github.com/strawberry-graphql/strawberry
+    #compilar archivo .proto
+    6.- python -m grpc_tools.protoc -I app/proto --python_out=app --grpc_python_out=app app/proto/service.proto
+    #Ejecutar el servidor GraphQL
+    7.- python -m uvicorn app.main:app --reload
 
 ------------------------------------------------------------------------------------------------
-#Ejecutar el servidor GraphQL
-python -m uvicorn app.main:app --reload
+--VALIDACION
+Si todos los comandos se ejecutan corectamente podremos acceder a la URL:
+http://localhost:8000/graphql
 
-------------------------------------------------------------------------------------------------
-
+Con lo cual nos visualizara una interfaz de ejecucion de graphQL
