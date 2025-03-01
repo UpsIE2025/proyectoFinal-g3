@@ -4,8 +4,8 @@ CREATE DATABASE IF NOT EXISTS auto_db;
 USE auto_db;
 
 CREATE TABLE IF NOT EXISTS Auto (
-                                    auto_id INT AUTO_INCREMENT PRIMARY KEY,
-                                    auto_marca VARCHAR(100),
+    auto_id INT AUTO_INCREMENT PRIMARY KEY,
+    auto_marca VARCHAR(100),
     auto_modelo VARCHAR(100),
     auto_anio VARCHAR(4)
     );

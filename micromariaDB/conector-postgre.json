@@ -1,25 +1,19 @@
 {
-  "name": "postgresql-connector",
+  "name": "postgres-connector",
   "config": {
+    "name": "postgres-connector",
     "connector.class": "io.debezium.connector.postgresql.PostgresConnector",
     "tasks.max": "1",
-    "database.hostname": "postgres",
+    "database.hostname": "postgres-db",  // Nombre del contenedor de PostgreSQL
     "database.port": "5432",
     "database.user": "postgres",
     "database.password": "12345",
     "database.dbname": "auto_db",
-    "database.server.name": "dbserver1",
-    "table.include.list": "public.Auto",
     "plugin.name": "pgoutput",
-    "publication.autocreate.mode": "filtered",
-    "publication.whitelist": "auto_db.Auto",
-    "config.storage.topic": "dbz-configs",
-    "offset.storage.topic": "dbz-offsets",
-    "key.converter": "org.apache.kafka.connect.json.JsonConverter",
-    "value.converter": "org.apache.kafka.connect.json.JsonConverter",
-    "value.converter.schemas.enable": "false",
-    "key.converter.schemas.enable": "false",
+    "database.server.name": "dbserver1",  // Este nombre se usará en Kafka
+    "table.include.list": "public.Auto",  // Incluye la tabla Auto para replicación
+    "database.history.kafka.bootstrap.servers": "kafka:9092",
+    "database.history.kafka.topic": "dbhistory.auto_db",
     "topic.prefix": "dbz"
   }
 }
-http://localhost:8083/connectors

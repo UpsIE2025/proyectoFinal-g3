@@ -21,7 +21,10 @@ ALTER SYSTEM SET max_replication_slots = 4;
 ALTER SYSTEM SET max_wal_senders = 4;
 
 -- Crear publicación para replicación lógica
-CREATE PUBLICATION auto_publication FOR TABLE auto;
+CREATE PUBLICATION auto_publication FOR TABLE Auto;
+CREATE USER debezium_user WITH PASSWORD 'yourpassword';
+GRANT SELECT ON ALL TABLES IN SCHEMA public TO debezium_user;
+ALTER USER debezium_user WITH REPLICATION;
 
 -- Recargar configuración
 SELECT pg_reload_conf();

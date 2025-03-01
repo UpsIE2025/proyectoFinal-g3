@@ -1,23 +1,26 @@
 package ups.edu.ec.micromariaDB.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 
-@Entity(name = "Auto")
+@Entity
+@Table(name = "Auto")
 public class Auto {
     @Id
-    private Long auto_id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer auto_id;
+
     private String auto_marca;
     private String auto_modelo;
     private String auto_anio;
 
     // Getters and Setters
 
-    public Long getAuto_id() {
+
+    public Integer getAuto_id() {
         return auto_id;
     }
 
-    public void setAuto_id(Long auto_id) {
+    public void setAuto_id(Integer auto_id) {
         this.auto_id = auto_id;
     }
 

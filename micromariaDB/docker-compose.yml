@@ -1,6 +1,7 @@
 version: '3.7'
 
 services:
+  # Zookeeper para Kafka
   zookeeper:
     image: wurstmeister/zookeeper:latest
     container_name: zookeeper
@@ -11,43 +12,36 @@ services:
     networks:
       - debezium_network
 
+  # Kafka
   kafka:
     image: confluentinc/cp-kafka:latest
     container_name: kafka
     hostname: kafka
+    restart: always
     environment:
-      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092,CONTROLLER://0.0.0.0:9093
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181  # Conexión a Zookeeper
       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
       KAFKA_LISTENER_SECURITY_PROTOCOL: PLAINTEXT
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT  # Agregar protocolo para CONTROLLER
-      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181  # Conexión a Zookeeper
+      KAFKA_LISTENER_NAME_INTERNAL: INTERNAL
+      KAFKA_LISTENER_INTERNAL: INSIDE://kafka:9093
+      KAFKA_LISTENER_PORT: 9092
+      KAFKA_ADVERTISED_LISTENER_PORT: 9092
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
-      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
-      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
-      KAFKA_NUM_PARTITIONS: 3
-      KAFKA_LISTENER_MODE: "dev"
     ports:
       - "9092:9092"
     depends_on:
       - zookeeper
     networks:
       - debezium_network
+    command: >
+      bash -c "
+        /etc/confluent/docker/run & 
+        sleep 10 && 
+        kafka-topics --create --if-not-exists --topic dbserver1.public.Auto --bootstrap-server kafka:9092 --partitions 1 --replication-factor 1 &&
+        tail -f /dev/null"
 
-  debezium-mariadb-connector:
-    image: debezium/connect:2.0
-    container_name: debezium-connector
-    environment:
-      - GROUP_ID=1
-      - CONFIG_STORAGE_TOPIC=dbz-configs
-      - OFFSET_STORAGE_TOPIC=dbz-offsets
-      - BOOTSTRAP_SERVERS=kafka:9092
-    ports:
-      - "8083:8083"
-    depends_on:
-      - kafka
-    networks:
-      - debezium_network
-
+  # PostgreSQL
   postgres:
     image: postgres:14-alpine
     container_name: postgres-db
@@ -62,8 +56,9 @@ services:
     command: postgres -c wal_level=logical -c max_replication_slots=4 -c max_wal_senders=4 -c listen_addresses='*'
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./init-scripts/postgresql:/docker-entrypoint-initdb.d  # Montar los scripts de PostgreSQL
+      - ./init-scripts/postgresql:/docker-entrypoint-initdb.d  # Montar los scripts de inicialización si tienes alguno
 
+  # MariaDB
   mariadb:
     image: mariadb:10.5
     container_name: mariadb-db
@@ -78,14 +73,37 @@ services:
       - debezium_network
     volumes:
       - mariadb_data:/var/lib/mysql
-      - ./init-scripts/mariadb:/docker-entrypoint-initdb.d  # Montar los scripts de MariaDB
+      - ./init-scripts/mariadb:/docker-entrypoint-initdb.d  # Montar los scripts de inicialización si tienes alguno
+    command: --server-id=1 --log-bin=mysql-bin --binlog-format=ROW --binlog-do-db=auto_db
 
+  # Conector de Debezium para PostgreSQL
+  debezium-postgres-connector:
+    image: debezium/connect:2.0
+    restart: always
+    container_name: debezium-postgres-connector
+    environment:
+      - BOOTSTRAP_SERVERS=kafka:9092
+      - GROUP_ID=1
+      - CONFIG_STORAGE_TOPIC=dbz-configs
+      - OFFSET_STORAGE_TOPIC=dbz-offsets
+    ports:
+      - "8083:8083"
+    depends_on:
+      - kafka
+      - postgres
+      - mariadb
+    volumes:
+      - ./debezium-connector:/debezium-connector
+    networks:
+      - debezium_network
+
+  # Aplicación Spring Boot
   spring-app:
     build: .
     container_name: spring-boot-app
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/auto_db
-      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_URL: jdbc:mysql://mariadb-db:3306/auto_db
+      SPRING_DATASOURCE_USERNAME: dbuser
       SPRING_DATASOURCE_PASSWORD: 12345
       SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
     volumes:
@@ -100,10 +118,10 @@ services:
       - debezium_network
 
 volumes:
-  postgres_data:  # Definimos el volumen aquí para PostgreSQL
-    driver: local  # Esto usa el driver local predeterminado, puedes cambiarlo si deseas usar otro driver
-  mariadb_data:  # Definimos el volumen aquí para MariaDB
-    driver: local  # Esto usa el driver local predeterminado, puedes cambiarlo si deseas usar otro driver
+  postgres_data:  # Definimos el volumen para PostgreSQL
+    driver: local
+  mariadb_data:  # Definimos el volumen para MariaDB
+    driver: local
 
 networks:
   debezium_network:

@@ -1,0 +1,19 @@
+{
+  "name": "mariadb-connector",
+  "config": {
+    "connector.class": "io.debezium.connector.mysql.MySqlConnector",
+    "tasks.max": "1",
+    "database.hostname": "mariadb-db",
+    "database.port": "3306",
+    "database.user": "dbuser",
+    "database.password": "12345",
+    "database.server.id": "223344",  // Asegúrate de que sea único
+    "database.server.name": "dbserver1",
+    "database.history.kafka.bootstrap.servers": "kafka:9092",
+    "database.history.kafka.topic": "dbhistory.mariadb",  // Asegúrate de que este tópico exista
+    "database.history.producer.bootstrap.servers": "kafka:9092",
+    "database.history.consumer.bootstrap.servers": "kafka:9092",
+    "database.history.consumer.group.id": "debezium-group",
+    "topic.prefix": "dbz"
+  }
+}
