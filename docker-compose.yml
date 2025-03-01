@@ -16,41 +16,31 @@ services:
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
     depends_on:
       - zookeeper
-  #Pendiente: Generar el war
-  #micro_producer:
-  #  image: micro_producer:latest
-  #  build:
-  #    context: ./micro_producer # Ruta donde está el Dockerfile
-  #    dockerfile: Dockerfile
-  #  ports:
-  #    - "8081:8080"  # ✅ El puerto 8080 del contenedor se expone como 8081 en el host
-  #  depends_on:
-  #    - kafka
 
-  #Pendiente: Generar el war
-  #micro_consumer:
-  #  image: micro_consumer:latest
-  #  build:
-  #    context: ./micro_consumer # Ruta donde está el Dockerfile
-  #    dockerfile: Dockerfile
-  #  ports:
-  #    - "8082:8082"
-  #  depends_on:
-  #    - kafka
-  
-  #Pendiente: Verificar si es el mismo graphql_project
-  #graphql_service:
-  #  build: .
-  #  container_name: graphql_service
-  #  ports:
-  #    - "8000:8000"
-  #  depends_on:
-  #    - kafka
-  #  environment:
-  #    - KAFKA_BROKER=kafka:9092
-  #    #- DATABASE_URL=postgresql://postgres:password@postgres:5432/mydatabase
-  
-  # Servicio de API Gateway con Kong
+  # Microservicio Producer 
+  micro_producer:
+    build:
+      context: ./micro_producer
+      dockerfile: Dockerfile
+    ports:
+      - "8081:8080"
+    depends_on:
+      - kafka
+
+  # Servicio GraphQL
+  graphql_service:
+    build:
+      context: ./graphql_project
+      dockerfile: Dockerfile
+    container_name: graphql_service
+    ports:
+      - "8000:8000"
+    depends_on:
+      - kafka
+    environment:
+      - KAFKA_BROKER=kafka:9092
+
+  # API Gateway con Kong
   kong:
     image: kong:latest
     container_name: kong
@@ -63,40 +53,16 @@ services:
       KONG_PROXY_ERROR_LOG: "/dev/stderr"
       KONG_ADMIN_ERROR_LOG: "/dev/stderr"
     ports:
-      - "8000:8000"  # Puerto para la API (Kong -> graphql_proyect, auth0_app_kong)
-      - "8443:8443"  # Puerto HTTPS
-      - "8001:8001"  # Administración HTTP
-      - "8444:8444"  # Administración HTTPS
+      - "8000:8000"
+      - "8443:8443"
+      - "8001:8001"
+      - "8444:8444"
     volumes:
-      - ./auth0_app_kong/gateway/kong.yml:/etc/kong/kong.yml  # Montamos la configuración de Kong
+      - ./auth0_app_kong/gateway/kong.yml:/etc/kong/kong.yml
     depends_on:
-      - graphql_project
+      - graphql_service
     networks:
       - kong-network
-
-  # Servicio del microservicio en Python (FastAPI)
-  graphql_project:
-    build:
-      context: ./graphql_project # Ruta donde está el Dockerfile
-      dockerfile: Dockerfile
-    container_name: graphql_project
-    restart: always
-    ports:
-      - "8002:8000"  # Exponer puerto interno 8000 en 8002 para pruebas directas
-    networks:
-      - kong-network
-  
-  #Pendiente configurar Dockerfile, y comprobar puertos
-  #auth0_app_kong:
-  #  build:
-  #    context: ./auth0_app_kong # Ruta donde está el Dockerfile
-  #    dockerfile: Dockerfile       
-  #  container_name: auth0_app_kong
-  #  restart: always
-  #  ports:
-  #    - "8003:8000"  # Exponer puerto interno 8003 en 8004 para pruebas directas
-  #  networks:
-  #    - kong-network
 
 networks:
   kong-network:
