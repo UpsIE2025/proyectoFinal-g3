@@ -16,16 +16,19 @@ services:
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
     depends_on:
       - zookeeper
-  #Pendiente: Generar el war
-  #micro_producer:
-  #  image: micro_producer:latest
-  #  build:
-  #    context: ./micro_producer # Ruta donde está el Dockerfile
-  #    dockerfile: Dockerfile
-  #  ports:
-  #    - "8081:8080"  # ✅ El puerto 8080 del contenedor se expone como 8081 en el host
-  #  depends_on:
-  #    - kafka
+  micro_producer:
+    build:
+      context: ./micro_producer
+      dockerfile: Dockerfile
+    ports:
+      - "8081:8080" 
+    depends_on:
+      - kafka
+    environment:
+      - KAFKA_BROKER=kafka:9092
+      - SPRING_PROFILES_ACTIVE=prod  # Ajusta según sea necesario
+    networks:
+      - kong-network
 
   #Pendiente: Generar el war
   #micro_consumer:
