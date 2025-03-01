@@ -42,21 +42,20 @@ docker-compose up --build
 
 ## Prueba de los servicios gRPC
 
-Puedes utilizar **Evans** (CLI para gRPC) o **grpcurl** para probar los servicios gRPC.
+Puedes utilizar **grpcurl** para probar los servicios gRPC.
 
-### Usando Evans
+### Crear un Auto
 ```sh
-evans --host localhost --port 9090 repl
-```
-Luego, dentro de Evans, puedes listar y llamar a los métodos:
-```sh
-show service
-call NombreDelMetodo
+grpcurl -plaintext -d '{
+  "marca": "Toyota",
+  "modelo": "Corolla",
+  "anio": 2022
+}' localhost:9090 com.grupo3.grpc.AutoService/CreateAuto
 ```
 
-### Usando grpcurl
+### Listar Autos
 ```sh
-grpcurl -plaintext -d '{"campo": "valor"}' localhost:9090 NombreDelServicio/NombreDelMetodo
+grpcurl -plaintext -d '{}' localhost:9090 com.grupo3.grpc.AutoService/ListAutos
 ```
 
 ## Licencia
